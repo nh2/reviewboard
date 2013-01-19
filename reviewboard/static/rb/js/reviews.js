@@ -1996,6 +1996,9 @@ $(document).ready(function() {
         }
     }
 
+    /* Set up file attachment actions. */
+    $('.file-container').fileAttachment();
+
     loadDiffFragments("diff_fragments", "comment_container");
 
     issueSummaryTableManager = new RB.IssueSummaryTableView({
