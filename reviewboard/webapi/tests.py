@@ -3741,10 +3741,31 @@ class ReviewCommentResourceTests(BaseWebAPITestCase):
         self.assertEqual(rsp['stat'], 'ok')
         self.assertEqual(rsp['diff_comment']['issue_status'], 'resolved')
 
-        # Finally, let's make sure that this user cannot alter the issue_status
-        # on a diff-comment for a review request that they didn't make.
+        # Check if the issue creator can drop the issue; they should be able to.
         review_request.submitter = User.objects.get(username='doc')
         review_request.save()
+
+        # Situation:
+        # review request owner: doc
+        # issue creator:        grumpy
+        # webapi user:          grumpy
+
+        rsp = self.apiPut(rsp['diff_comment']['links']['self']['href'], {
+            'issue_status': 'dropped',
+        }, expected_mimetype=self.item_mimetype)
+        self.assertEqual(rsp['stat'], 'ok')
+        self.assertEqual(rsp['diff_comment']['issue_status'], 'dropped')
+
+        # Finally, let's make sure that an user who is neither issue creator
+        # nor review request owner cannot alter the issue_status.
+        # Let's change the comment creator to doc
+        review.user = User.objects.get(username='doc')
+        review.save()
+
+        # Situation:
+        # review request owner: doc
+        # issue creator:        doc
+        # webapi user:          grumpy
 
         rsp = self.apiPut(rsp['diff_comment']['links']['self']['href'], {
             'issue_status': 'dropped',
@@ -5981,10 +6002,31 @@ class ReviewScreenshotCommentResourceTests(BaseWebAPITestCase):
         self.assertEqual(rsp['stat'], 'ok')
         self.assertEqual(rsp['screenshot_comment']['issue_status'], 'resolved')
 
-        # Finally, let's make sure that this user cannot alter the issue_status
-        # on a screenshot-comment for a review request that they didn't make.
+        # Check if the issue creator can drop the issue; they should be able to.
         review_request.submitter = User.objects.get(username='doc')
         review_request.save()
+
+        # Situation:
+        # review request owner: doc
+        # issue creator:        grumpy
+        # webapi user:          grumpy
+
+        rsp = self.apiPut(rsp['screenshot_comment']['links']['self']['href'], {
+            'issue_status': 'dropped',
+        }, expected_mimetype=ScreenshotCommentResourceTests.item_mimetype)
+        self.assertEqual(rsp['stat'], 'ok')
+        self.assertEqual(rsp['screenshot_comment']['issue_status'], 'dropped')
+
+        # Finally, let's make sure that an user who is neither issue creator
+        # nor review request owner cannot alter the issue_status.
+        # Let's change the comment creator to doc
+        review.user = User.objects.get(username='doc')
+        review.save()
+
+        # Situation:
+        # review request owner: doc
+        # issue creator:        doc
+        # webapi user:          grumpy
 
         rsp = self.apiPut(rsp['screenshot_comment']['links']['self']['href'], {
             'issue_status': 'dropped',

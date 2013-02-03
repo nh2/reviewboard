@@ -573,11 +573,9 @@ def comment_issue(context, review_request, comment, comment_type):
 
     issue_status = BaseComment.issue_status_to_string(comment.issue_status)
     user = context.get('user', None)
-    interactive = 'false'
 
-    if user and user.is_authenticated() and \
-        user == review_request.submitter:
-        interactive = 'true'
+    # Determines whether the user is shown controls to fix/drop the issue.
+    interactive = 'true' if comment.can_change_issue_status(user) else 'false'
 
     return {
         'comment': comment,
